@@ -2,7 +2,7 @@ import java.util.Map;
 
 public class HuffmanTree {
 	
-	public PriorityQueue<Pair> tree;
+	public PriorityQueue<> tree;
 
 	public HuffmanTree(Map<Short, Integer> m) {
 		
