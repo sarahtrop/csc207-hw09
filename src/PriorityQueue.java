@@ -42,6 +42,17 @@ public class PriorityQueue<T extends Comparable<T>> {
 		}
 	}
 	
+	/**
+	 * Method created for Huffman Tree creation, gets the lowest priority thing
+	 * and then removes it.
+	 * @return	the lowest priority thing on the queue
+	 */
+	public T getChild() {
+		T temp = tree.get(tree.size() - 1);
+		tree.remove(tree.size() - 1);
+		return temp;
+	}
+	
 	public T peek() {
 		return tree.get(0);
 	}
