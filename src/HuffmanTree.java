@@ -1,4 +1,3 @@
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Map;
@@ -7,6 +6,7 @@ import java.util.Set;
 public class HuffmanTree {
 	
 	public Node root;
+	private Map<Short, Short> codes;
 
 	/**
 	 * Combines two nodes
@@ -18,6 +18,10 @@ public class HuffmanTree {
 		return new Node(l1.v + l2.v, (short)0, l1, l2);
 	}
 	
+	/**
+	 * Constructor for a HuffmanTree
+	 * @param m	a Map
+	 */
 	public HuffmanTree(Map<Short, Integer> m) {
 		// Create a temporary priority queue to sort the stuff in the Map
 		PriorityQueue<Node> queue = new PriorityQueue<>();
@@ -30,8 +34,9 @@ public class HuffmanTree {
 		}
 		// Now that we a have priority queue of nodes, recursively combine nodes until we have a queue with 1 thing
 		root = buildTree(queue);
+		buildCodes(root, (short)0);
 	}
-	
+
 	/**
 	 * Method combines nodes from a PriorityQueue until there is only 1 left, a tree
 	 * @param queue	a PriorityQueue
@@ -41,24 +46,13 @@ public class HuffmanTree {
 		if (queue.size() == 1) { // if there is only one thing left, return it 
 			return queue.poll();
 		} else { // otherwise, continue to combine nodes
-			Node lowest = next(queue); //get the lowest priority thing
-			Node nextLowest = next(queue); // get the next lowest priority thing
+			Node lowest = queue.poll(); //get the lowest priority thing
+			Node nextLowest = queue.poll(); // get the next lowest priority thing
 			queue.add(combine(lowest, nextLowest));
 			return buildTree(queue);
 		}
 	}
-	
-	/**
-	 * Method gets the lowest priority item in a PriorityQueue
-	 * @param queue	a PriorityQueue
-	 * @return		a Node
-	 */
-	public Node next(PriorityQueue<Node> queue) {
-		Node temp = (Node) queue.toArray()[queue.size() - 1];
-		queue.remove(queue.size() - 1);
-		return temp;
-	}
-	
+
 	/**
 	 * Encodes a bit stream into a compressed representation
 	 * @param in	a BitInputStream
@@ -78,23 +72,40 @@ public class HuffmanTree {
 	}
 	
 	/**
+	 * Finds the codes for the characters in the tree
+	 * @param node
+	 * @param code
+	 */
+	private void buildCodes(Node node, short code) {
+		codes = new HashMap<>();
+		
+		if (node.left == null && node.right == null) {
+			codes.put(node.c, code);
+		}
+		else {
+			buildCodes(node.left, code);
+			buildCodes(node.right, (short)(code + 1));
+		}
+	}
+	
+	/**
 	 * Helper method to print a tree in order 	
 	 * @param node	a Node
 	 */
-	private void inorderH(Node node) {
+	private void preorder(Node node) {
 		if (node == null) {
 			return;
 		}
-		inorderH(node.left);
 		System.out.print("[" + node.c + ", " + node.v + "]");
-		inorderH(node.right);
+		preorder(node.left);
+		preorder(node.right);
 	}
 
 	/**
 	 * Calls helper method to print a tree in order
 	 */
 	public void treeToString() {
-		inorderH(root);
+		preorder(root);
 	}
 	
 	public static void main(String[] args) {
@@ -105,11 +116,7 @@ public class HuffmanTree {
 		m.put((short)'b', 2);
 		m.put((short)001, 1);
 		
-		System.out.println(Arrays.toString(m.entrySet().toArray()));
-		
 		HuffmanTree t = new HuffmanTree(m);
-		
-		t.treeToString();
 	}
 	
 }
