@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Map;
@@ -42,6 +44,28 @@ public class HuffmanTree {
 	}
 
 	/**
+	 * Encodes a bit stream into a compressed representation
+	 * @param in	a BitInputStream
+	 * @param out	a BitOutputStream
+	 */
+	public void encode(BitInputStream in, BitOutputStream out) {
+		
+			String arr[] = codes.get(str).split(" ");
+			for (int i = 0; i < arr.length; i++) {
+				out.writeBit(Integer.parseInt(arr[i])); // write to the out stream
+			}
+	}
+	
+	/**
+	 * Decodes a bit stream into a compressed representation
+	 * @param in	a BitInputStream
+	 * @param out	a BitOutputStream
+	 */
+	public void decode(BitInputStream in, BitOutputStream out) {
+		
+	}
+
+	/**
 	 * Method combines nodes from a PriorityQueue until there is only 1 left, a tree
 	 * @param queue	a PriorityQueue
 	 * @return		a Node
@@ -55,29 +79,6 @@ public class HuffmanTree {
 			queue.add(combine(lowest, nextLowest)); // combine and add back into the queue
 			return buildTree(queue);
 		}
-	}
-
-	/**
-	 * Encodes a bit stream into a compressed representation
-	 * @param in	a BitInputStream
-	 * @param out	a BitOutputStream
-	 */
-	public void encode(BitInputStream in, BitOutputStream out) {
-		for (Short c : codes.keySet()) { // for every code
-			String arr[] = codes.get(c).split(" ");
-			for (int i = 0; i < arr.length; i++) {
-				out.writeBit(Integer.parseInt(arr[i])); // write to the out stream
-			}
-		}
-	}
-	
-	/**
-	 * Decodes a bit stream into a compressed representation
-	 * @param in	a BitInputStream
-	 * @param out	a BitOutputStream
-	 */
-	public void decode(BitInputStream in, BitOutputStream out) {
-		
 	}
 	
 	/**
@@ -116,14 +117,22 @@ public class HuffmanTree {
 		preorder(root);
 	}
 	
-	public static void main(String[] args) {
-		Map<Short, Integer> m = new HashMap<>();
-		m.put((short)'z', 1);
-		m.put((short)'a', 3);
-		m.put((short)' ', 2);
-		m.put((short)'b', 2);
-		
+	/**
+	 * 
+	 * @param filename
+	 * @return
+	 */
+	public static Map<Short, Integer> buildMap(String filename) {
+		File file = new File(filename);
+	}
+	
+	public static void main(String[] args) throws IOException {
+		Map<Short, Integer> m = buildMap("data/in.txt");
 		HuffmanTree t = new HuffmanTree(m);
+		BitInputStream in = new BitInputStream("data/in.txt");
+		BitOutputStream out = new BitOutputStream("data/out.txt");
+		t.encode(in, out);
+		t.decode(in, out);
 	}
 	
 }
