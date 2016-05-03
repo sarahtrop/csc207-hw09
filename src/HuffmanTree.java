@@ -1,6 +1,4 @@
-import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Map;
@@ -50,14 +48,15 @@ public class HuffmanTree {
 	 * @param out	a BitOutputStream
 	 */
 	public void encode(BitInputStream in, BitOutputStream out) {
+		// For the entire file
 		while(in.hasBits()) { // this is coming up as false, don't know why
-			System.out.println("LOOP");
+			// Read in a character
 			short val = (short)in.readBits(8);
-			System.out.println("Val: " + val);
+			// Get the Huffman code for that character
 			String code = codes.get(val);
-			System.out.println("Code: " + code);
+			// Split into bits
 			String arr[] = code.split(" ");
-			System.out.println("Array: " + Arrays.toString(arr));
+			// Write each bit into the out file
 			for (int i = 0; i < arr.length; i++) {
 				out.writeBit(Integer.parseInt(arr[i]));
 			}
@@ -70,7 +69,23 @@ public class HuffmanTree {
 	 * @param out	a BitOutputStream
 	 */
 	public void decode(BitInputStream in, BitOutputStream out) {
-		
+		String code = "" + in.readBit();
+		// For the entire file
+		while(in.hasBits()) {
+			// If the code is valid
+			if (codes.containsValue(code)) {
+				// Split into bits
+				String arr[] = code.split(" ");
+				// Write bits into output file
+				for (int i = 0; i < arr.length; i++) {
+					out.writeBit(Integer.parseInt(arr[i]));
+				}
+				// Reset code
+				code = new String();
+			} 
+			// Add a bit and start over
+			code += "" + in.readBit();
+		}
 	}
 
 	/**
@@ -153,13 +168,15 @@ public class HuffmanTree {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		Map<Short, Integer> m = buildMap("data/in.txt");
+		Map<Short, Integer> m = buildMap("data/original.txt");
 		HuffmanTree t = new HuffmanTree(m);
 		
-		BitInputStream in = new BitInputStream("data/in.txt");
-		BitOutputStream out = new BitOutputStream("data/out.txt");
-		t.encode(in, out);
-		//t.decode(in, out);
+		BitInputStream in_encode = new BitInputStream("data/original.txt");
+		BitOutputStream out_encode = new BitOutputStream("data/encoded.txt");
+		t.encode(in_encode, out_encode);
+		BitInputStream in_decode = new BitInputStream("data/encoded.txt");
+		BitOutputStream out_decode = new BitOutputStream("data/decoded.txt");
+		t.decode(in_decode, out_decode);
 	}
 	
 }
