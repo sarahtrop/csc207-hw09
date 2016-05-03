@@ -1,4 +1,3 @@
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Map;
@@ -16,6 +15,7 @@ public class HuffmanTree {
 	 * @return		a Node
 	 */
 	public Node combine(Node l1, Node l2) {
+		// -1 is the inner node character
 		return new Node(l1.v + l2.v, (short)-1, l1, l2);
 	}
 	
@@ -35,8 +35,10 @@ public class HuffmanTree {
 		}
 		// Now that we a have priority queue of nodes, recursively combine nodes until we have a queue with 1 thing
 		root = buildTree(queue);
-		codes = new HashMap();
+		codes = new HashMap<>();
 		buildCodes(root, "0");
+		// -2 is the EOF character
+		codes.put((short)-2, "001");
 	}
 
 	/**
@@ -62,7 +64,10 @@ public class HuffmanTree {
 	 */
 	public void encode(BitInputStream in, BitOutputStream out) {
 		for (Short c : codes.keySet()) { // for every code
-			out.writeBit(c); // write to the out stream
+			String arr[] = codes.get(c).split(" ");
+			for (int i = 0; i < arr.length; i++) {
+				out.writeBit(Integer.parseInt(arr[i])); // write to the out stream
+			}
 		}
 	}
 	
@@ -80,47 +85,15 @@ public class HuffmanTree {
 	 * @param node
 	 * @param code
 	 */
-	private void buildCodes(Node parent, String code) {
-		System.out.print("Parent:" + parent.c + ", " + parent.v);
-		Node left = parent.left;
-		System.out.print(" Left:" + left.c + ", " + left.v);
-		Node right = parent.right;
-		System.out.print(" Right:" + right.c + ", " + right.v);
-		System.out.println(" Code: " + code);
-		
-		if (left == null && right == null) {
-			codes.put(parent.c, code);
-		}
-		
-		// If either child is the last one
-		if (isInnerNode(left) || isInnerNode(right)) {
-			// If the left is the last one
-			if (isInnerNode(left)) {
-				// Store the code and iterate down the right side
-				System.out.println(code);
-				codes.put(left.c, code);
-				buildCodes(right, code + "1");
-			// If the right is the last one
-			} else {
-				// Store the code and iterate down the left side
-				System.out.println(code);
-				codes.put(right.c, code);
-				buildCodes(left, code + "0");
-			}
-		// Otherwise, go down both sides
+	private void buildCodes(Node node, String code) {
+		// If the node is an inner node, recur. 
+		if (node.c == -1) {
+			buildCodes(node.left, code + " 0");
+			buildCodes(node.right, code + " 1");
+		// Otherwise, add the code to the map
 		} else {
-			buildCodes(left, code + "0");
-			buildCodes(right, code + "1");
+			codes.put(node.c, code);
 		}
-	}
-	
-	/**
-	 * Method that checks if the node is an inner node, without a character
-	 * @param node	a Node
-	 * @return		a boolean
-	 */
-	private boolean isInnerNode(Node node) {
-		return node.v == -1;
 	}
 	
 	/**
@@ -149,11 +122,8 @@ public class HuffmanTree {
 		m.put((short)'a', 3);
 		m.put((short)' ', 2);
 		m.put((short)'b', 2);
-		m.put((short)001, 1);
 		
 		HuffmanTree t = new HuffmanTree(m);
-		t.treeToString();
-		//System.out.println(Arrays.toString(t.codes.entrySet().toArray()));
 	}
 	
 }
