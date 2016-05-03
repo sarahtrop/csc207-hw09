@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Map;
@@ -6,7 +7,7 @@ import java.util.Set;
 public class HuffmanTree {
 	
 	public Node root;
-	private Map<Short, Short> codes;
+	public Map<Short, Short> codes;
 
 	/**
 	 * Combines two nodes
@@ -48,7 +49,7 @@ public class HuffmanTree {
 		} else { // otherwise, continue to combine nodes
 			Node lowest = queue.poll(); //get the lowest priority thing
 			Node nextLowest = queue.poll(); // get the next lowest priority thing
-			queue.add(combine(lowest, nextLowest));
+			queue.add(combine(lowest, nextLowest)); // combine and add back into the queue
 			return buildTree(queue);
 		}
 	}
@@ -59,7 +60,9 @@ public class HuffmanTree {
 	 * @param out	a BitOutputStream
 	 */
 	public void encode(BitInputStream in, BitOutputStream out) {
-		
+		for (Short c : codes.keySet()) { // for every code
+			out.writeBit(c); // write to the out stream
+		}
 	}
 	
 	/**
@@ -76,16 +79,20 @@ public class HuffmanTree {
 	 * @param node
 	 * @param code
 	 */
-	private void buildCodes(Node node, short code) {
+	private void buildCodes(Node parent, short code) {
 		codes = new HashMap<>();
+		Node lChild = parent.left;
+		Node rChild = parent.right;
 		
-		if (node.left == null && node.right == null) {
-			codes.put(node.c, code);
-		}
-		else {
-			buildCodes(node.left, code);
-			buildCodes(node.right, (short)(code + 1));
-		}
+		// If the left child node is the last one, save the code
+		if (lChild.left == null && lChild.right == null) { codes.put(rChild.c, code); }
+		// Otherwise, iterate down that branch
+		else { buildCodes(lChild, code); }
+		
+		// If the right child node is the last one, save the code
+		if (rChild.left == null && rChild.right == null) { codes.put(rChild.c, code); }
+		// Otherwise, iterate down that branch
+		else { buildCodes(rChild, (short)(code + 1)); }
 	}
 	
 	/**
@@ -117,6 +124,8 @@ public class HuffmanTree {
 		m.put((short)001, 1);
 		
 		HuffmanTree t = new HuffmanTree(m);
+		t.treeToString();
+		System.out.println(Arrays.toString(t.codes.entrySet().toArray()));
 	}
 	
 }
