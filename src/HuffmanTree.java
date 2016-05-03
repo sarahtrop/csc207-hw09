@@ -6,8 +6,8 @@ import java.util.Set;
 
 public class HuffmanTree {
 	
-	public Node root;
-	public Map<Short, Short> codes;
+	private Node root;
+	private Map<Short, String> codes;
 
 	/**
 	 * Combines two nodes
@@ -16,7 +16,7 @@ public class HuffmanTree {
 	 * @return		a Node
 	 */
 	public Node combine(Node l1, Node l2) {
-		return new Node(l1.v + l2.v, (short)0, l1, l2);
+		return new Node(l1.v + l2.v, (short)-1, l1, l2);
 	}
 	
 	/**
@@ -35,7 +35,8 @@ public class HuffmanTree {
 		}
 		// Now that we a have priority queue of nodes, recursively combine nodes until we have a queue with 1 thing
 		root = buildTree(queue);
-		buildCodes(root, (short)0);
+		codes = new HashMap();
+		buildCodes(root, "0");
 	}
 
 	/**
@@ -43,7 +44,7 @@ public class HuffmanTree {
 	 * @param queue	a PriorityQueue
 	 * @return		a Node
 	 */
-	public Node buildTree(PriorityQueue<Node> queue) {
+	private Node buildTree(PriorityQueue<Node> queue) {
 		if (queue.size() == 1) { // if there is only one thing left, return it 
 			return queue.poll();
 		} else { // otherwise, continue to combine nodes
@@ -79,20 +80,47 @@ public class HuffmanTree {
 	 * @param node
 	 * @param code
 	 */
-	private void buildCodes(Node parent, short code) {
-		codes = new HashMap<>();
-		Node lChild = parent.left;
-		Node rChild = parent.right;
+	private void buildCodes(Node parent, String code) {
+		System.out.print("Parent:" + parent.c + ", " + parent.v);
+		Node left = parent.left;
+		System.out.print(" Left:" + left.c + ", " + left.v);
+		Node right = parent.right;
+		System.out.print(" Right:" + right.c + ", " + right.v);
+		System.out.println(" Code: " + code);
 		
-		// If the left child node is the last one, save the code
-		if (lChild.left == null && lChild.right == null) { codes.put(rChild.c, code); }
-		// Otherwise, iterate down that branch
-		else { buildCodes(lChild, code); }
+		if (left == null && right == null) {
+			codes.put(parent.c, code);
+		}
 		
-		// If the right child node is the last one, save the code
-		if (rChild.left == null && rChild.right == null) { codes.put(rChild.c, code); }
-		// Otherwise, iterate down that branch
-		else { buildCodes(rChild, (short)(code + 1)); }
+		// If either child is the last one
+		if (isInnerNode(left) || isInnerNode(right)) {
+			// If the left is the last one
+			if (isInnerNode(left)) {
+				// Store the code and iterate down the right side
+				System.out.println(code);
+				codes.put(left.c, code);
+				buildCodes(right, code + "1");
+			// If the right is the last one
+			} else {
+				// Store the code and iterate down the left side
+				System.out.println(code);
+				codes.put(right.c, code);
+				buildCodes(left, code + "0");
+			}
+		// Otherwise, go down both sides
+		} else {
+			buildCodes(left, code + "0");
+			buildCodes(right, code + "1");
+		}
+	}
+	
+	/**
+	 * Method that checks if the node is an inner node, without a character
+	 * @param node	a Node
+	 * @return		a boolean
+	 */
+	private boolean isInnerNode(Node node) {
+		return node.v == -1;
 	}
 	
 	/**
@@ -125,7 +153,7 @@ public class HuffmanTree {
 		
 		HuffmanTree t = new HuffmanTree(m);
 		t.treeToString();
-		System.out.println(Arrays.toString(t.codes.entrySet().toArray()));
+		//System.out.println(Arrays.toString(t.codes.entrySet().toArray()));
 	}
 	
 }
