@@ -47,14 +47,14 @@ public class HuffmanTree {
 	 * Encodes a bit stream into a compressed representation
 	 * @param in	a BitInputStream
 	 * @param out	a BitOutputStream
-	 */
+	 *
 	public void encode(BitInputStream in, BitOutputStream out) {
 		
 			String arr[] = codes.get(str).split(" ");
 			for (int i = 0; i < arr.length; i++) {
 				out.writeBit(Integer.parseInt(arr[i])); // write to the out stream
 			}
-	}
+	}*/
 	
 	/**
 	 * Decodes a bit stream into a compressed representation
@@ -121,9 +121,26 @@ public class HuffmanTree {
 	 * 
 	 * @param filename
 	 * @return
+	 * @throws IOException 
 	 */
-	public static Map<Short, Integer> buildMap(String filename) {
-		File file = new File(filename);
+	public static Map<Short, Integer> buildMap(String filename) throws IOException {
+		BitInputStream in = new BitInputStream(filename);
+		Map<Short, Integer> ret = new HashMap<>();
+		int c = in.readBits(8);
+		int freqArr[] = new int[26]; // Array of frequencies
+		
+		// Iterate over the file, counting the characters
+		while (c != -1) {
+			int index = (char)c - 'a';
+			if (index < 26 && index >= 0) { freqArr[index]++; }
+			c = in.readBits(8);
+		}
+		
+		// Put the characters and their frequencies in the map
+		for (int i = 0; i < 26; i++) {
+			ret.put((short)((char)i + 'a'), freqArr[i]);
+		}
+		return ret;
 	}
 	
 	public static void main(String[] args) throws IOException {
@@ -131,8 +148,8 @@ public class HuffmanTree {
 		HuffmanTree t = new HuffmanTree(m);
 		BitInputStream in = new BitInputStream("data/in.txt");
 		BitOutputStream out = new BitOutputStream("data/out.txt");
-		t.encode(in, out);
-		t.decode(in, out);
+		//t.encode(in, out);
+		//t.decode(in, out);
 	}
 	
 }
