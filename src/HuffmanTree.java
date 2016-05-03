@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class HuffmanTree {
 	 */
 	public Node combine(Node l1, Node l2) {
 		// -1 is the inner node character
-		return new Node(l1.v + l2.v, (short)-1, l1, l2);
+		return new Node(l1.freq + l2.freq, (short)-1, l1, l2);
 	}
 	
 	/**
@@ -47,14 +48,21 @@ public class HuffmanTree {
 	 * Encodes a bit stream into a compressed representation
 	 * @param in	a BitInputStream
 	 * @param out	a BitOutputStream
-	 *
+	 */
 	public void encode(BitInputStream in, BitOutputStream out) {
-		
-			String arr[] = codes.get(str).split(" ");
+		while(in.hasBits()) { // this is coming up as false, don't know why
+			System.out.println("LOOP");
+			short val = (short)in.readBits(8);
+			System.out.println("Val: " + val);
+			String code = codes.get(val);
+			System.out.println("Code: " + code);
+			String arr[] = code.split(" ");
+			System.out.println("Array: " + Arrays.toString(arr));
 			for (int i = 0; i < arr.length; i++) {
-				out.writeBit(Integer.parseInt(arr[i])); // write to the out stream
+				out.writeBit(Integer.parseInt(arr[i]));
 			}
-	}*/
+		}
+	}
 	
 	/**
 	 * Decodes a bit stream into a compressed representation
@@ -105,7 +113,7 @@ public class HuffmanTree {
 		if (node == null) {
 			return;
 		}
-		System.out.print("[" + node.c + ", " + node.v + "]");
+		System.out.print("[" + node.c + ", " + node.freq + "]");
 		preorder(node.left);
 		preorder(node.right);
 	}
@@ -126,13 +134,14 @@ public class HuffmanTree {
 	public static Map<Short, Integer> buildMap(String filename) throws IOException {
 		BitInputStream in = new BitInputStream(filename);
 		Map<Short, Integer> ret = new HashMap<>();
-		int c = in.readBits(8);
-		int freqArr[] = new int[26]; // Array of frequencies
+		int freqArr[] = new int[27]; // Array of frequencies
 		
 		// Iterate over the file, counting the characters
-		while (c != -1) {
+		while (in.hasBits()) {
+			int c = in.readBits(8);
 			int index = (char)c - 'a';
-			if (index < 26 && index >= 0) { freqArr[index]++; }
+			if ((char)c == ' ') { index = 26; }
+			if (index < 27 && index >= 0) { freqArr[index]++; }
 			c = in.readBits(8);
 		}
 		
@@ -146,9 +155,10 @@ public class HuffmanTree {
 	public static void main(String[] args) throws IOException {
 		Map<Short, Integer> m = buildMap("data/in.txt");
 		HuffmanTree t = new HuffmanTree(m);
+		
 		BitInputStream in = new BitInputStream("data/in.txt");
 		BitOutputStream out = new BitOutputStream("data/out.txt");
-		//t.encode(in, out);
+		t.encode(in, out);
 		//t.decode(in, out);
 	}
 	
