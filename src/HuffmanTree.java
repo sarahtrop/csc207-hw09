@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Map;
@@ -48,16 +49,12 @@ public class HuffmanTree {
 	 * @param out	a BitOutputStream
 	 */
 	public void encode(BitInputStream in, BitOutputStream out) {
-		// For the entire file
-		while(in.hasBits()) { // this is coming up as false, don't know why
-			// Read in a character
-			short val = (short)in.readBits(8);
-			// Get the Huffman code for that character
-			String code = codes.get(val);
-			// Split into bits
-			String arr[] = code.split(" ");
-			// Write each bit into the out file
-			for (int i = 0; i < arr.length; i++) {
+		short val;
+		while(in.hasBits()) { // Until there are no more bits
+			val = (short)in.readBits(8);
+			String code = codes.get(val); // Get the Huffman code for that character
+			String[] arr = code.split(","); // Split into bits
+			for (int i = 0; i < arr.length; i++) { // Write each bit into the out file
 				out.writeBit(Integer.parseInt(arr[i]));
 			}
 		}
@@ -69,22 +66,16 @@ public class HuffmanTree {
 	 * @param out	a BitOutputStream
 	 */
 	public void decode(BitInputStream in, BitOutputStream out) {
-		String code = "" + in.readBit();
-		// For the entire file
-		while(in.hasBits()) {
-			// If the code is valid
-			if (codes.containsValue(code)) {
-				// Split into bits
-				String arr[] = code.split(" ");
-				// Write bits into output file
-				for (int i = 0; i < arr.length; i++) {
+		String code = new String();
+		while(in.hasBits()) { // until there are no more bits
+			 code += "" + in.readBit();
+			if (codes.containsValue(code)) { // If the code is valid
+				String[] arr = code.split(","); // Split into bits
+				for (int i = 0; i < arr.length; i++) { // Write bits into output file
 					out.writeBit(Integer.parseInt(arr[i]));
 				}
-				// Reset code
-				code = new String();
-			} 
-			// Add a bit and start over
-			code += "" + in.readBit();
+				code = new String(); // Reset code
+			}
 		}
 	}
 
@@ -112,8 +103,8 @@ public class HuffmanTree {
 	private void buildCodes(Node node, String code) {
 		// If the node is an inner node, recur. 
 		if (node.c == -1) {
-			buildCodes(node.left, code + " 0");
-			buildCodes(node.right, code + " 1");
+			buildCodes(node.left, code + ",0");
+			buildCodes(node.right, code + ",1");
 		// Otherwise, add the code to the map
 		} else {
 			codes.put(node.c, code);
@@ -149,20 +140,19 @@ public class HuffmanTree {
 	public static Map<Short, Integer> buildMap(String filename) throws IOException {
 		BitInputStream in = new BitInputStream(filename);
 		Map<Short, Integer> ret = new HashMap<>();
-		int freqArr[] = new int[27]; // Array of frequencies
+		int freqArr[] = new int[26]; // Array of frequencies
 		
 		// Iterate over the file, counting the characters
-		while (in.hasBits()) {
-			int c = in.readBits(8);
+		int c = in.readBits(8);
+		while (c != -1) {
 			int index = (char)c - 'a';
-			if ((char)c == ' ') { index = 26; }
-			if (index < 27 && index >= 0) { freqArr[index]++; }
+			if (index < 26 && index >= 0) { freqArr[index]++; }
 			c = in.readBits(8);
 		}
 		
 		// Put the characters and their frequencies in the map
 		for (int i = 0; i < 26; i++) {
-			ret.put((short)((char)i + 'a'), freqArr[i]);
+			if (freqArr[i] != 0) { ret.put((short)((char)i + 'a'), freqArr[i]); }
 		}
 		return ret;
 	}
