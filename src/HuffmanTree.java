@@ -70,6 +70,7 @@ public class HuffmanTree {
 		while(in.hasBits()) { // until there are no more bits
 			 code += "" + in.readBit();
 			if (codes.containsValue(code)) { // If the code is valid
+				if (codes.get(code).equals((short)-2)) { return; } // If this is the end of file, exit
 				String[] arr = code.split(","); // Split into bits
 				for (int i = 0; i < arr.length; i++) { // Write bits into output file
 					out.writeBit(Integer.parseInt(arr[i]));
