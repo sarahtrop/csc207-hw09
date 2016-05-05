@@ -39,8 +39,8 @@ public class HuffmanTree {
 		root = buildTree(queue);
 		codes = new HashMap<>();
 		buildCodes(root, "0");
-		// -2 is the EOF character
-		codes.put((short)-2, "001");
+		// 256 is the EOF character
+		codes.put((short)256, "001");
 	}
 
 	/**
@@ -55,15 +55,17 @@ public class HuffmanTree {
 			val = (short)in.readBits(8); // Read the next character
 			//System.out.println(val);
 			String code = codes.get(val); // Get the Huffman code for that character
-			//System.out.println("code " + code);
+			System.out.println("code " + code);
 			if (code != null) {
 				for (int i = 0; i < code.length(); i++) { // Write each bit into the out file
-					System.out.print(Integer.parseInt(code.substring(i, i+1)));
+					//System.out.print(Integer.parseInt(code.substring(i, i+1)));
 					out.writeBit(Integer.parseInt(code.substring(i, i+1)));
 				}
 			}
 		}
 		System.out.println("");
+		in.close();
+		out.close();
 	}
 	
 	/**
@@ -85,6 +87,8 @@ public class HuffmanTree {
 				code = new String(); // Reset code
 			}
 		}
+		in.close();
+		out.close();
 	}
 
 	/**
@@ -138,15 +142,8 @@ public class HuffmanTree {
 	public void treeToString() {
 		preorder(root);
 	}
-	
-	/**
-	 * 
-	 * @param filename
-	 * @return
-	 * @throws IOException 
-	 */
-	public static Map<Short, Integer> buildMap(String filename) throws IOException {
-		BitInputStream in = new BitInputStream(filename);
+	// temp DELETE WHEN DONE
+	public static Map<Short, Integer> createFrequencyMap(BitInputStream in) throws IOException {
 		Map<Short, Integer> ret = new HashMap<>();
 		int freqArr[] = new int[26]; // Array of frequencies
 		
@@ -166,7 +163,7 @@ public class HuffmanTree {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		Map<Short, Integer> m = buildMap("data/original.txt");
+		Map<Short, Integer> m = createFrequencyMap(new BitInputStream("data/original.txt"));
 		HuffmanTree t = new HuffmanTree(m);
 
 		t.encode(new BitInputStream("data/original.txt"), new BitOutputStream("data/encoded.txt"));
