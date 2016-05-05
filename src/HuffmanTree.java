@@ -49,15 +49,21 @@ public class HuffmanTree {
 	 * @param out	a BitOutputStream
 	 */
 	public void encode(BitInputStream in, BitOutputStream out) {
+		System.out.println("encode");
 		short val;
 		while(in.hasBits()) { // Until there are no more bits
-			val = (short)in.readBits(8);
+			val = (short)in.readBits(8); // Read the next character
+			//System.out.println(val);
 			String code = codes.get(val); // Get the Huffman code for that character
-			String[] arr = code.split(","); // Split into bits
-			for (int i = 0; i < arr.length; i++) { // Write each bit into the out file
-				out.writeBit(Integer.parseInt(arr[i]));
+			//System.out.println("code " + code);
+			if (code != null) {
+				for (int i = 0; i < code.length(); i++) { // Write each bit into the out file
+					System.out.print(Integer.parseInt(code.substring(i, i+1)));
+					out.writeBit(Integer.parseInt(code.substring(i, i+1)));
+				}
 			}
 		}
+		System.out.println("");
 	}
 	
 	/**
@@ -67,13 +73,14 @@ public class HuffmanTree {
 	 */
 	public void decode(BitInputStream in, BitOutputStream out) {
 		String code = new String();
+		System.out.println("decode");
 		while(in.hasBits()) { // until there are no more bits
 			 code += "" + in.readBit();
 			if (codes.containsValue(code)) { // If the code is valid
-				if (codes.get(code).equals((short)-2)) { return; } // If this is the end of file, exit
-				String[] arr = code.split(","); // Split into bits
-				for (int i = 0; i < arr.length; i++) { // Write bits into output file
-					out.writeBit(Integer.parseInt(arr[i]));
+				if (code.equals("001")) { return; } // If this is the end of file, exit
+				for (int i = 0; i < code.length(); i++) { // Write each bit into the out file
+					System.out.print(Integer.parseInt(code.substring(i, i+1)));
+					out.writeBit(Integer.parseInt(code.substring(i, i+1)));
 				}
 				code = new String(); // Reset code
 			}
@@ -104,8 +111,8 @@ public class HuffmanTree {
 	private void buildCodes(Node node, String code) {
 		// If the node is an inner node, recur. 
 		if (node.c == -1) {
-			buildCodes(node.left, code + ",0");
-			buildCodes(node.right, code + ",1");
+			buildCodes(node.left, code + "0");
+			buildCodes(node.right, code + "1");
 		// Otherwise, add the code to the map
 		} else {
 			codes.put(node.c, code);
@@ -161,13 +168,9 @@ public class HuffmanTree {
 	public static void main(String[] args) throws IOException {
 		Map<Short, Integer> m = buildMap("data/original.txt");
 		HuffmanTree t = new HuffmanTree(m);
-		
-		BitInputStream in_encode = new BitInputStream("data/original.txt");
-		BitOutputStream out_encode = new BitOutputStream("data/encoded.txt");
-		t.encode(in_encode, out_encode);
-		BitInputStream in_decode = new BitInputStream("data/encoded.txt");
-		BitOutputStream out_decode = new BitOutputStream("data/decoded.txt");
-		t.decode(in_decode, out_decode);
+
+		t.encode(new BitInputStream("data/original.txt"), new BitOutputStream("data/encoded.txt"));
+		t.decode(new BitInputStream("data/encoded.txt"), new BitOutputStream("data/decoded.txt"));
 	}
 	
 }
