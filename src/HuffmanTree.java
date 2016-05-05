@@ -35,12 +35,11 @@ public class HuffmanTree {
 			// create a new node with the code and integer
 			queue.add(new Node(m.get(key), key, null, null));
 		}
+		queue.add(new Node(1, (short)256, null, null)); // EOF character
 		// Now that we a have priority queue of nodes, recursively combine nodes until we have a queue with 1 thing
 		root = buildTree(queue);
 		codes = new HashMap<>();
 		buildCodes(root, "0");
-		// 256 is the EOF character
-		codes.put((short)256, "001");
 	}
 	
 	/**
@@ -111,7 +110,7 @@ public class HuffmanTree {
 		while(in.hasBits()) { // until there are no more bits
 			 code += "" + in.readBit();
 			if (codes.containsValue(code)) { // If the code is valid
-				if (code.equals("001")) { return; } // If this is the end of file, exit
+				// MUST FIND EOF CODE AND EXIT IF FOUND
 				for (int i = 0; i < code.length(); i++) { // Write each bit into the out file
 					System.out.print(Integer.parseInt(code.substring(i, i+1)));
 					out.writeBit(Integer.parseInt(code.substring(i, i+1)));
