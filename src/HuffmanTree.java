@@ -99,9 +99,12 @@ public class HuffmanTree {
 	 */
 	public void decode(BitInputStream in, BitOutputStream out) {
 		String code = new String();
+		System.out.println("...");
 		while(in.hasBits()) { // until there are no more bits
 			 code += "" + in.readBit();
+			for (short k : codes.keySet()) { System.out.println(k + " => " + codes.get(k)); }
 			if (codes.containsValue(code)) { // If the code is valid
+				System.out.println("Did Sarah fuck up?");
 				short val = getShortFromHuffCode(code);
 				if (val == (short)256) { return; } // if EOF, return out
 				out.writeBits(val, 8);
@@ -124,40 +127,6 @@ public class HuffmanTree {
 			}
 		}
 		return (short)-1;
-	}
-	
-	// temporary method DELETE WHEN DONE
-	public static Map<Short, Integer> createFrequencyMap(BitInputStream in) throws IOException {
-		Map<Short, Integer> ret = new HashMap<>();
-		int freqArr[] = new int[27]; // Array of frequencies
-		
-		// Iterate over the file, counting the characters
-		int c = in.readBits(8);
-		while (c != -1) {
-			if ((char)c == 32) { freqArr[freqArr.length - 1]++; } // account for whitespace character
-			else {
-				int index = (char)c - 'a';
-				if (index < 26 && index >= 0) { freqArr[index]++; }
-			}
-			c = in.readBits(8);
-		}
-		
-		// Put the characters and their frequencies in the map
-		for (int i = 0; i < 27; i++) {
-			if (i == 26) { ret.put((short)32, freqArr[i]); }
-			else if (freqArr[i] != 0) { ret.put((short)((char)i + 'a'), freqArr[i]); }
-		}
-		return ret;
-	}
-	
-	// temporary method DELETE WHEN DONE
-	public static void main(String[] args) throws IOException {
-		Map<Short, Integer> m = createFrequencyMap(new BitInputStream("data/original.txt"));
-		System.out.println(Arrays.toString(m.entrySet().toArray()));
-		HuffmanTree t = new HuffmanTree(m);
-
-		t.encode(new BitInputStream("data/original.txt"), new BitOutputStream("data/encoded.txt"));
-		t.decode(new BitInputStream("data/encoded.txt"), new BitOutputStream("data/decoded.txt"));
 	}
 	
 }

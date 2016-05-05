@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,15 +13,15 @@ public class GrinEncoder {
 		Map<Short, Integer> map = createFrequencyMap(in);
 		
 		// Write the magic number to the output file
-		out.writeBit(1846);
+		out.writeBits(1846, 32);
 		// Write the number of codes to the output file
-		out.writeBit(map.size());
+		out.writeBits(map.size(), 32);
 		// Write the frequency map to the output file
 		writeFrequencyMap(map, out);
 		
 		// Construct HuffmanTree and encode
 		HuffmanTree tree = new HuffmanTree(map);
-		tree.encode(in, out);
+		tree.encode(new BitInputStream(infile), out);
 		
 		in.close();
 		out.close();
@@ -34,27 +35,24 @@ public class GrinEncoder {
 	 */
 	public static Map<Short, Integer> createFrequencyMap(BitInputStream in) throws IOException {
 		Map<Short, Integer> ret = new HashMap<>();
-		int freqArr[] = new int[26]; // Array of frequencies
 		
 		// Iterate over the file, counting the characters
 		int c = in.readBits(8);
-		while (c != -1) {
-			int index = (char)c - 'a';
-			if (index < 26 && index >= 0) { freqArr[index]++; }
+		while(in.hasBits()) {
+			if (ret.containsKey(c)) {
+				ret.put((short)c, ret.get(c) + 1);
+			} else {
+				ret.put((short)c, 1);
+			}
 			c = in.readBits(8);
-		}
-		
-		// Put the characters and their frequencies in the map
-		for (int i = 0; i < 26; i++) {
-			if (freqArr[i] != 0) { ret.put((short)((char)i + 'a'), freqArr[i]); }
 		}
 		return ret;
 	}
 
 	public static void writeFrequencyMap(Map<Short, Integer> map, BitOutputStream out) {
 		for(Short key : map.keySet()) {
-			out.writeBit(key);
-			out.writeBit(map.get(key));
+			out.writeBits(key, 16);
+			out.writeBits(map.get(key), 32);
 		}
 	}
 	
