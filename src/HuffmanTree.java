@@ -42,6 +42,22 @@ public class HuffmanTree {
 		// 256 is the EOF character
 		codes.put((short)256, "001");
 	}
+	
+	/**
+	 * Method combines nodes from a PriorityQueue until there is only 1 left, a tree
+	 * @param queue	a PriorityQueue
+	 * @return		a Node
+	 */
+	private Node buildTree(PriorityQueue<Node> queue) {
+		if (queue.size() == 1) { // if there is only one thing left, return it 
+			return queue.poll();
+		} else { // otherwise, continue to combine nodes
+			Node lowest = queue.poll(); //get the lowest priority thing
+			Node nextLowest = queue.poll(); // get the next lowest priority thing
+			queue.add(combine(lowest, nextLowest)); // combine and add back into the queue
+			return buildTree(queue);
+		}
+	}
 
 	/**
 	 * Encodes a bit stream into a compressed representation
@@ -69,6 +85,22 @@ public class HuffmanTree {
 	}
 	
 	/**
+	 * Finds the codes for the characters in the tree
+	 * @param node
+	 * @param code
+	 */
+	private void buildCodes(Node node, String code) {
+		// If the node is an inner node, recur. 
+		if (node.c == -1) {
+			buildCodes(node.left, code + "0");
+			buildCodes(node.right, code + "1");
+		// Otherwise, add the code to the map
+		} else {
+			codes.put(node.c, code);
+		}
+	}
+	
+	/**
 	 * Decodes a bit stream into a compressed representation
 	 * @param in	a BitInputStream
 	 * @param out	a BitOutputStream
@@ -90,59 +122,8 @@ public class HuffmanTree {
 		in.close();
 		out.close();
 	}
-
-	/**
-	 * Method combines nodes from a PriorityQueue until there is only 1 left, a tree
-	 * @param queue	a PriorityQueue
-	 * @return		a Node
-	 */
-	private Node buildTree(PriorityQueue<Node> queue) {
-		if (queue.size() == 1) { // if there is only one thing left, return it 
-			return queue.poll();
-		} else { // otherwise, continue to combine nodes
-			Node lowest = queue.poll(); //get the lowest priority thing
-			Node nextLowest = queue.poll(); // get the next lowest priority thing
-			queue.add(combine(lowest, nextLowest)); // combine and add back into the queue
-			return buildTree(queue);
-		}
-	}
 	
-	/**
-	 * Finds the codes for the characters in the tree
-	 * @param node
-	 * @param code
-	 */
-	private void buildCodes(Node node, String code) {
-		// If the node is an inner node, recur. 
-		if (node.c == -1) {
-			buildCodes(node.left, code + "0");
-			buildCodes(node.right, code + "1");
-		// Otherwise, add the code to the map
-		} else {
-			codes.put(node.c, code);
-		}
-	}
-	
-	/**
-	 * Helper method to print a tree in order 	
-	 * @param node	a Node
-	 */
-	private void preorder(Node node) {
-		if (node == null) {
-			return;
-		}
-		System.out.print("[" + node.c + ", " + node.freq + "]");
-		preorder(node.left);
-		preorder(node.right);
-	}
-
-	/**
-	 * Calls helper method to print a tree in order
-	 */
-	public void treeToString() {
-		preorder(root);
-	}
-	// temp DELETE WHEN DONE
+	// temporary method DELETE WHEN DONE
 	public static Map<Short, Integer> createFrequencyMap(BitInputStream in) throws IOException {
 		Map<Short, Integer> ret = new HashMap<>();
 		int freqArr[] = new int[26]; // Array of frequencies
@@ -162,6 +143,7 @@ public class HuffmanTree {
 		return ret;
 	}
 	
+	// temporary method DELETE WHEN DONE
 	public static void main(String[] args) throws IOException {
 		Map<Short, Integer> m = createFrequencyMap(new BitInputStream("data/original.txt"));
 		HuffmanTree t = new HuffmanTree(m);
