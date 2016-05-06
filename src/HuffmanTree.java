@@ -64,12 +64,14 @@ public class HuffmanTree {
 	 * @param out	a BitOutputStream
 	 */
 	public void encode(BitInputStream in, BitOutputStream out) {
-		short val;
 		while(in.hasBits()) { // Until there are no more bits
-			val = (short)in.readBits(8); // Read the next character
+			short val = (short)in.readBits(8); // Read the next character
 			String code = codes.get(val); // Get the Huffman code for that character
 			if (code != null) {
-				out.writeBits(Integer.parseInt(code), code.length());
+				for (int i = 0; i < code.length(); i++) {
+					int bit = (int)code.charAt(i) - 48;
+					out.writeBit(bit);
+				}
 			}
 		}
 		in.close();

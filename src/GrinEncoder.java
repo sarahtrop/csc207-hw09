@@ -1,5 +1,4 @@
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,17 +34,16 @@ public class GrinEncoder {
 	 */
 	public static Map<Short, Integer> createFrequencyMap(BitInputStream in) throws IOException {
 		Map<Short, Integer> ret = new HashMap<>();
-		
 		// Iterate over the file, counting the characters
-		int c = in.readBits(8);
+		short c = (short)in.readBits(8);
 		while(in.hasBits()) {
-			if (ret.containsKey((short)c)) {
-				if (ret.get(c) == null) { ret.put((short)c, 2); }
-				ret.put((short)c, ret.get(c) + 1);
+			if (ret.containsKey(c)) {
+				if (ret.get(c) == null) { ret.put(c, 2); }
+				ret.put(c, ret.get(c) + 1);
 			} else {
-				ret.put((short)c, 1);
+				ret.put(c, 1);
 			}
-			c = in.readBits(8);
+			c = (short)in.readBits(8);
 		}
 		return ret;
 	}
