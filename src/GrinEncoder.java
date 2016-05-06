@@ -38,11 +38,12 @@ public class GrinEncoder {
 		
 		// Iterate over the file, counting the characters
 		int c = in.readBits(8);
-		while(in.hasBits()) { // for the entire file
-			if (ret.containsKey(c)) { // if it is already there
-				ret.put((short)c, ret.get(c) + 1); // overwrite with a higher value
-			} else { // otherwise
-				ret.put((short)c, 1); // put in with a value of 1
+		while(in.hasBits()) {
+			if (ret.containsKey((short)c)) {
+				if (ret.get(c) == null) { ret.put((short)c, 2); }
+				ret.put((short)c, ret.get(c) + 1);
+			} else {
+				ret.put((short)c, 1);
 			}
 			c = in.readBits(8);
 		}

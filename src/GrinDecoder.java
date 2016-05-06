@@ -27,9 +27,6 @@ public class GrinDecoder {
 			int occurences = in.readBits(32);
 			map.put((short) code, occurences);
 		}
-		for (short k : map.keySet()) {
-			System.out.println(k + ":" + map.get(k));
-		}
 
 		// Construct a Huffman Tree from the map
 		HuffmanTree tree = new HuffmanTree(map);

@@ -99,12 +99,9 @@ public class HuffmanTree {
 	 */
 	public void decode(BitInputStream in, BitOutputStream out) {
 		String code = new String();
-		System.out.println("...");
 		while(in.hasBits()) { // until there are no more bits
-			 code += "" + in.readBit();
-			for (short k : codes.keySet()) { System.out.println(k + " => " + codes.get(k)); }
+			code += "" + in.readBit();
 			if (codes.containsValue(code)) { // If the code is valid
-				System.out.println("Did Sarah fuck up?");
 				short val = getShortFromHuffCode(code);
 				if (val == (short)256) { return; } // if EOF, return out
 				out.writeBits(val, 8);
